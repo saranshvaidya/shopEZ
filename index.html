@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopEase - Your Online Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom CSS for elements that need more styling than Tailwind provides */
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .star-rating {
+            color: #FFD700;
+        }
+        .cart-item {
+            transition: all 0.3s ease;
+        }
+        .cart-item:hover {
+            background-color: #f8fafc;
+        }
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        .slide-in {
+            animation: slideIn 0.3s forwards;
+        }
+        .slide-out {
+            animation: slideOut 0.3s forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); }
+            to { transform: translateX(100%); }
+        }
+        .blur-bg {
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="#" onclick="showHomePage()" class="text-xl font-bold text-indigo-600 flex items-center">
+                        <i class="fas fa-shopping-bag mr-2"></i> ShopEase
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Search products..." 
+                               class="border rounded-full py-1 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64"
+                               id="searchInput">
+                        <button onclick="searchProducts()" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-indigo-600">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="relative group">
+                        <button onclick="toggleCart()" class="text-gray-700 hover:text-indigo-600 relative">
+                            <i class="fas fa-shopping-cart text-xl"></i>
+                            <span id="cartCount" class="absolute -top-2 -right-2 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                        </button>
+                    </div>
+                    <div class="relative dropdown">
+                        <button class="text-gray-700 hover:text-indigo-600">
+                            <i class="fas fa-user-circle text-xl"></i>
+                        </button>
+                        <div class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
+                            <a href="#" onclick="showLoginPage()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">Login</a>
+                            <a href="#" onclick="showAdminDashboard()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">Admin</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Home Page (Default View) -->
+        <div id="homePage">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Our Products</h1>
+                <div class="flex space-x-4">
+                    <select id="categoryFilter" onchange="filterProducts()" class="border rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">All Categories</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="clothing">Clothing</option>
+                        <option value="home">Home & Kitchen</option>
+                        <option value="books">Books</option>
+                    </select>
+                    <select id="priceFilter" onchange="filterProducts()" class="border rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">All Prices</option>
+                        <option value="0-50">$0 - $50</option>
+                        <option value="50-100">$50 - $100</option>
+                        <option value="100-500">$100 - $500</option>
+                        <option value="500+">$500+</option>
+                    </select>
+                    <select id="ratingFilter" onchange="filterProducts()" class="border rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">All Ratings</option>
+                        <option value="4+">4+ Stars</option>
+                        <option value="3+">3+ Stars</option>
+                        <option value="2+">2+ Stars</option>
+                        <option value="1+">1+ Stars</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="productsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Products will be loaded here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Product Detail Page -->
+        <div id="productDetailPage" class="hidden">
+            <button onclick="showHomePage()" class="mb-4 text-indigo-600 hover:text-indigo-800 flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Products
+            </button>
+            <div id="productDetailContent" class="bg-white rounded-lg shadow-md p-6">
+                <!-- Product details will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Cart Page -->
+        <div id="cartPage" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Your Shopping Cart</h2>
+                <button onclick="showHomePage()" class="text-indigo-600 hover:text-indigo-800">
+                    <i class="fas fa-arrow-left mr-2"></i> Continue Shopping
+                </button>
+            </div>
+            <div id="cartItems" class="bg-white rounded-lg shadow-md p-6 mb-4">
+                <!-- Cart items will be loaded here -->
+                <p class="text-center text-gray-500 py-8">Your cart is empty</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Order Summary</h3>
+                    <span id="cartTotal" class="text-xl font-bold">$0.00</span>
+                </div>
+                <button onclick="checkout()" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300">
+                    Proceed to Checkout
+                </button>
+            </div>
+        </div>
+
+        <!-- Checkout Page -->
+        <div id="checkoutPage" class="hidden max-w-2xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Checkout</h2>
+                <button onclick="showCartPage()" class="text-indigo-600 hover:text-indigo-800">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Cart
+                </button>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 mb-4">
+                <h3 class="text-lg font-semibold mb-4">Shipping Information</h3>
+                <form id="checkoutForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                            <input type="text" id="firstName" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        </div>
+                        <div>
+                            <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                            <input type="text" id="lastName" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                        <input type="text" id="address" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                            <input type="text" id="city" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        </div>
+                        <div>
+                            <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                            <input type="text" id="state" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        </div>
+                        <div>
+                            <label for="zip" class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                            <input type="text" id="zip" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label for="payment" class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                        <select id="payment" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                            <option value="">Select Payment Method</option>
+                            <option value="credit">Credit Card</option>
+                            <option value="paypal">PayPal</option>
+                            <option value="bank">Bank Transfer</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg font-semibold">Total: <span id="checkoutTotal">$0.00</span></span>
+                        <button type="submit" class="bg-indigo-600 text-white py-2 px-6 rounded-md hover:bg-indigo-700 transition duration-300">
+                            Place Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Order Confirmation Page -->
+        <div id="orderConfirmationPage" class="hidden max-w-2xl mx-auto text-center">
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <div class="text-green-500 text-6xl mb-4">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Order Confirmed!</h2>
+                <p class="text-gray-600 mb-6">Thank you for your purchase. Your order has been placed successfully.</p>
+                <p class="text-gray-600 mb-6">Order ID: <span id="orderId" class="font-semibold">#123456</span></p>
+                <button onclick="showHomePage()" class="bg-indigo-600 text-white py-2 px-6 rounded-md hover:bg-indigo-700 transition duration-300">
+                    Continue Shopping
+                </button>
+            </div>
+        </div>
+
+        <!-- Login Page -->
+        <div id="loginPage" class="hidden max-w-md mx-auto">
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Login to Your Account</h2>
+                <form id="loginForm">
+                    <div class="mb-4">
+                        <label for="loginEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="loginEmail" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="mb-6">
+                        <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="loginPassword" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300 mb-4">
+                        Login
+                    </button>
+                    <p class="text-center text-gray-600">
+                        Don't have an account? <a href="#" class="text-indigo-600 hover:text-indigo-800">Sign up</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+                <button onclick="showHomePage()" class="text-indigo-600 hover:text-indigo-800">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Store
+                </button>
+            </div>
+            
+            <div class="mb-6">
+                <button onclick="showAddProductForm()" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300">
+                    <i class="fas fa-plus mr-2"></i> Add New Product
+                </button>
+            </div>
+            
+            <div id="addProductForm" class="hidden bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-4">Add New Product</h2>
+                <form id="productForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="productName" class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                            <input type="text" id="productName" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        </div>
+                        <div>
+                            <label for="productPrice" class="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                            <input type="number" id="productPrice" step="0.01" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="productCategory" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select id="productCategory" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                                <option value="">Select Category</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="clothing">Clothing</option>
+                                <option value="home">Home & Kitchen</option>
+                                <option value="books">Books</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="productRating" class="block text-sm font-medium text-gray-700 mb-1">Rating (1-5)</label>
+                            <input type="number" id="productRating" min="1" max="5" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="productDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea id="productDescription" rows="3" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="productImage" class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                        <input type="text" id="productImage" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" onclick="hideAddProductForm()" class="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition duration-300">
+                            Cancel
+                        </button>
+                        <button type="submit" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300">
+                            Save Product
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminProductsTable" class="bg-white divide-y divide-gray-200">
+                        <!-- Admin products will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">ShopEase</h3>
+                    <p class="text-gray-400">Your one-stop shop for all your needs. Quality products at affordable prices.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Home</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Products</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Customer Service</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">FAQs</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Shipping Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Returns & Refunds</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Connect With Us</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                    <p class="text-gray-400 mt-4">Subscribe to our newsletter</p>
+                    <div class="flex mt-2">
+                        <input type="email" placeholder="Your email" class="bg-gray-700 text-white px-3 py-2 rounded-l-md focus:outline-none w-full">
+                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-r-md hover:bg-indigo-700">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2023 ShopEase. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Side Cart -->
+    <div id="sideCart" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl transform translate-x-full z-50 transition-transform duration-300 ease-in-out">
+        <div class="p-4 border-b flex justify-between items-center">
+            <h3 class="text-lg font-semibold">Your Cart</h3>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="sideCartItems" class="p-4 overflow-y-auto h-3/4">
+            <!-- Side cart items will be loaded here -->
+            <p class="text-center text-gray-500 py-8">Your cart is empty</p>
+        </div>
+        <div class="p-4 border-t absolute bottom-0 w-full bg-white">
+            <div class="flex justify-between mb-4">
+                <span class="font-semibold">Total:</span>
+                <span id="sideCartTotal" class="font-bold">$0.00</span>
+            </div>
+            <button onclick="showCartPage()" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300">
+                View Cart
+            </button>
+        </div>
+    </div>
+    <div id="sideCartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+
+    <script>
+        // Sample product data
+        let products = [
+            {
+                id: 1,
+                name: "Wireless Headphones",
+                price: 99.99,
+                category: "electronics",
+                rating: 4.5,
+                description: "Premium wireless headphones with noise cancellation and 30-hour battery life.",
+                image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=500&q=60"
+            },
+            {
+                id: 2,
+                name: "Smart Watch",
+                price: 199.99,
+                category: "electronics",
+                rating: 4.2,
+                description: "Feature-packed smartwatch with fitness tracking and smartphone notifications.",
+                image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=500&q=60"
+            },
+            {
+                id: 3,
+                name: "Cotton T-Shirt",
+                price: 24.99,
+                category: "clothing",
+                rating: 4.0,
+                description: "Comfortable 100% cotton t-shirt available in multiple colors.",
+                image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=500&q=60"
+            },
+            {
+                id: 4,
+                name: "Non-Stick Frying Pan",
+                price: 49.99,
+                category: "home",
+                rating: 4.7,
+                description: "Professional-grade non-stick frying pan for perfect cooking results.",
+                image: "https://images.unsplash.com/photo-1583772264830-9e97f0a6a5d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=500&q=60"
+            },
+            {
+                id: 5,
+                name: "Bestseller Novel",
+                price: 14.99,
+                category: "books",
+                rating: 4.8,
+                description: "The latest bestseller from a renowned author, hardcover edition.",
+                image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=500&q=60"
+            },
+            {
+                id: 6,
+                name: "Bluetooth Speaker",
+                price: 79.99,
+                category: "electronics",
+                rating: 4.3,
+                description: "Portable Bluetooth speaker with 20-hour battery life and waterproof design.",
+                image: "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=500&q=60"
+            },
+            {
+                id: 7,
+                name: "Denim Jeans",
+                price: 59.99,
+                category: "clothing",
+                rating: 4.1,
+                description: "Classic fit denim jeans with stretch for maximum comfort.",
+                image: "https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=500&q=60"
+            },
+            {
+                id: 8,
+                name: "Air Fryer",
+                price: 129.99,
+                category: "home",
+                rating: 4.6,
+                description: "Digital air fryer with multiple cooking functions and easy-clean basket.",
+                image: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=500&q=60"
+            }
+        ];
+
+        // Cart data
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let currentPage = 'home';
+        let editingProductId = null;
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+            updateCartCount();
+            loadCartItems();
+            loadAdminProducts();
+            
+            // Form submissions
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                login();
+            });
+            
+            document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                placeOrder();
+            });
+            
+            document.getElementById('productForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveProduct();
+            });
+        });
+
+        // Load products to the home page
+        function loadProducts() {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+            
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300';
+                productCard.innerHTML = `
+                    <div class="h-48 overflow-hidden">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">${product.name}</h3>
+                        <div class="flex items-center mb-2">
+                            <div class="star-rating">
+                                ${renderStars(product.rating)}
+                            </div>
+                            <span class="text-gray-600 text-sm ml-1">(${product.rating})</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-3">${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-lg">$${product.price.toFixed(2)}</span>
+                            <button onclick="addToCart(${product.id})" class="bg-indigo-600 text-white py-1 px-3 rounded-md hover:bg-indigo-700 transition duration-300 text-sm">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Add click event to view product details
+                productCard.addEventListener('click', function(e) {
+                    // Don't trigger if clicking on the "Add to Cart" button
+                    if (!e.target.closest('button')) {
+                        showProductDetail(product.id);
+                    }
+                });
+                
+                container.appendChild(productCard);
+            });
+        }
+
+        // Render star rating
+        function renderStars(rating) {
+            let stars = '';
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<i class="fas fa-star"></i>';
+            }
+            
+            if (hasHalfStar) {
+                stars += '<i class="fas fa-star-half-alt"></i>';
+            }
+            
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<i class="far fa-star"></i>';
+            }
+            
+            return stars;
+        }
+
+        // Filter products based on selected filters
+        function filterProducts() {
+            const category = document.getElementById('categoryFilter').value;
+            const price = document.getElementById('priceFilter').value;
+            const rating = document.getElementById('ratingFilter').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            
+            let filtered = products;
+            
+            // Filter by category
+            if (category) {
+                filtered = filtered.filter(p => p.category === category);
+            }
+            
+            // Filter by price range
+            if (price) {
+                if (price === '0-50') {
+                    filtered = filtered.filter(p => p.price >= 0 && p.price <= 50);
+                } else if (price === '50-100') {
+                    filtered = filtered.filter(p => p.price > 50 && p.price <= 100);
+                } else if (price === '100-500') {
+                    filtered = filtered.filter(p => p.price > 100 && p.price <= 500);
+                } else if (price === '500+') {
+                    filtered = filtered.filter(p => p.price > 500);
+                }
+            }
+            
+            // Filter by minimum rating
+            if (rating) {
+                const minRating = parseFloat(rating);
+                filtered = filtered.filter(p => p.rating >= minRating);
+            }
+            
+            // Filter by search term
+            if (search) {
+                filtered = filtered.filter(p => 
+                    p.name.toLowerCase().includes(search) || 
+                    p.description.toLowerCase().includes(search) ||
+                    p.category.toLowerCase().includes(search)
+                );
+            }
+            
+            // Display filtered products
+            displayFilteredProducts(filtered);
+        }
+
+        // Display filtered products
+        function displayFilteredProducts(filteredProducts) {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+            
+            if (filteredProducts.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 col-span-4 py-12">No products match your filters.</p>';
+                return;
+            }
+            
+            filteredProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300';
+                productCard.innerHTML = `
+                    <div class="h-48 overflow-hidden">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">${product.name}</h3>
+                        <div class="flex items-center mb-2">
+                            <div class="star-rating">
+                                ${renderStars(product.rating)}
+                            </div>
+                            <span class="text-gray-600 text-sm ml-1">(${product.rating})</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-3">${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-lg">$${product.price.toFixed(2)}</span>
+                            <button onclick="addToCart(${product.id})" class="bg-indigo-600 text-white py-1 px-3 rounded-md hover:bg-indigo-700 transition duration-300 text-sm">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Add click event to view product details
+                productCard.addEventListener('click', function(e) {
+                    // Don't trigger if clicking on the "Add to Cart" button
+                    if (!e.target.closest('button')) {
+                        showProductDetail(product.id);
+                    }
+                });
+                
+                container.appendChild(productCard);
+            });
+        }
+
+        // Search products
+        function searchProducts() {
+            filterProducts();
+        }
+
+        // Show product detail page
+        function showProductDetail(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const detailContent = document.getElementById('productDetailContent');
+            detailContent.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/2">
+                        <img src="${product.image}" alt="${product.name}" class="w-full rounded-lg">
+                    </div>
+                    <div class="md:w-1/2">
+                        <h2 class="text-2xl font-bold mb-2">${product.name}</h2>
+                        <div class="flex items-center mb-4">
+                            <div class="star-rating">
+                                ${renderStars(product.rating)}
+                            </div>
+                            <span class="text-gray-600 ml-2">${product.rating} (${Math.floor(Math.random() * 100) + 1} reviews)</span>
+                        </div>
+                        <p class="text-gray-700 mb-4">${product.description}</p>
+                        <div class="mb-4">
+                            <span class="text-3xl font-bold">$${product.price.toFixed(2)}</span>
+                            <span class="text-green-600 ml-2">In Stock</span>
+                        </div>
+                        <div class="flex space-x-4 mb-6">
+                            <div class="flex items-center border rounded-md">
+                                <button onclick="updateQuantity(${product.id}, -1)" class="px-3 py-1 text-lg">-</button>
+                                <span id="quantity-${product.id}" class="px-3 py-1 border-x">1</span>
+                                <button onclick="updateQuantity(${product.id}, 1)" class="px-3 py-1 text-lg">+</button>
+                            </div>
+                            <button onclick="addToCart(${product.id}, true)" class="bg-indigo-600 text-white py-2 px-6 rounded-md hover:bg-indigo-700 transition duration-300 flex-1">
+                                Add to Cart
+                            </button>
+                        </div>
+                        <div class="border-t pt-4">
+                            <h3 class="font-semibold mb-2">Product Details</h3>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li><span class="font-medium">Category:</span> ${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</li>
+                                <li><span class="font-medium">SKU:</span> PRD-${product.id.toString().padStart(4, '0')}</li>
+                                <li><span class="font-medium">Shipping:</span> Free shipping on orders over $50</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Switch to product detail page
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('productDetailPage').classList.remove('hidden');
+            document.getElementById('cartPage').classList.add('hidden');
+            document.getElementById('checkoutPage').classList.add('hidden');
+            document.getElementById('orderConfirmationPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            
+            currentPage = 'productDetail';
+        }
+
+        // Update product quantity on detail page
+        function updateQuantity(productId, change) {
+            const quantityElement = document.getElementById(`quantity-${productId}`);
+            let quantity = parseInt(quantityElement.textContent);
+            quantity += change;
+            if (quantity < 1) quantity = 1;
+            quantityElement.textContent = quantity;
+        }
+
+        // Add product to cart
+        function addToCart(productId, fromDetailPage = false) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            let quantity = 1;
+            if (fromDetailPage) {
+                quantity = parseInt(document.getElementById(`quantity-${productId}`).textContent);
+            }
+            
+            // Check if product already in cart
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    quantity: quantity
+                });
+            }
+            
+            // Save to local storage
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            // Update cart count
+            updateCartCount();
+            
+            // Reload cart items
+            loadCartItems();
+            loadSideCartItems();
+            
+            // Show success message
+            alert(`${quantity} ${product.name} added to cart!`);
+            
+            // Close side cart if open
+            if (fromDetailPage) {
+                toggleCart();
+            }
+        }
+
+        // Update cart count in navbar
+        function updateCartCount() {
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+
+        // Load cart items to cart page
+        function loadCartItems() {
+            const container = document.getElementById('cartItems');
+            const totalElement = document.getElementById('cartTotal');
+            const checkoutTotalElement = document.getElementById('checkoutTotal');
+            
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-8">Your cart is empty</p>';
+                totalElement.textContent = '$0.00';
+                checkoutTotalElement.textContent = '$0.00';
+                return;
+            }
+            
+            container.innerHTML = '';
+            let total = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item flex items-center py-4 border-b last:border-b-0';
+                cartItem.innerHTML = `
+                    <div class="w-20 h-20 overflow-hidden rounded-md mr-4">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-medium">${item.name}</h3>
+                        <p class="text-gray-600 text-sm">$${item.price.toFixed(2)}</p>
+                    </div>
+                    <div class="flex items-center">
+                        <button onclick="updateCartItemQuantity(${item.id}, -1)" class="text-gray-500 hover:text-indigo-600 px-2">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="mx-2">${item.quantity}</span>
+                        <button onclick="updateCartItemQuantity(${item.id}, 1)" class="text-gray-500 hover:text-indigo-600 px-2">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="ml-6 font-semibold">$${itemTotal.toFixed(2)}</div>
+                    <button onclick="removeFromCart(${item.id})" class="ml-4 text-red-500 hover:text-red-700">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                container.appendChild(cartItem);
+            });
+            
+            totalElement.textContent = `$${total.toFixed(2)}`;
+            checkoutTotalElement.textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Load cart items to side cart
+        function loadSideCartItems() {
+            const container = document.getElementById('sideCartItems');
+            const totalElement = document.getElementById('sideCartTotal');
+            
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-8">Your cart is empty</p>';
+                totalElement.textContent = '$0.00';
+                return;
+            }
+            
+            container.innerHTML = '';
+            let total = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item flex items-center py-3 border-b last:border-b-0';
+                cartItem.innerHTML = `
+                    <div class="w-16 h-16 overflow-hidden rounded-md mr-3">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-medium text-sm">${item.name}</h3>
+                        <p class="text-gray-600 text-xs">$${item.price.toFixed(2)} x ${item.quantity}</p>
+                    </div>
+                    <div class="font-semibold text-sm">$${itemTotal.toFixed(2)}</div>
+                `;
+                
+                container.appendChild(cartItem);
+            });
+            
+            totalElement.textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Update cart item quantity
+        function updateCartItemQuantity(productId, change) {
+            const item = cart.find(item => item.id === productId);
+            if (!item) return;
+            
+            item.quantity += change;
+            
+            if (item.quantity < 1) {
+                removeFromCart(productId);
+            } else {
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartCount();
+                loadCartItems();
+                loadSideCartItems();
+            }
+        }
+
+        // Remove item from cart
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            loadCartItems();
+            loadSideCartItems();
+        }
+
+        // Toggle side cart visibility
+        function toggleCart() {
+            const sideCart = document.getElementById('sideCart');
+            const overlay = document.getElementById('sideCartOverlay');
+            
+            if (sideCart.classList.contains('translate-x-full')) {
+                sideCart.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sideCart.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Page navigation functions
+        function showHomePage() {
+            document.getElementById('homePage').classList.remove('hidden');
+            document.getElementById('productDetailPage').classList.add('hidden');
+            document.getElementById('cartPage').classList.add('hidden');
+            document.getElementById('checkoutPage').classList.add('hidden');
+            document.getElementById('orderConfirmationPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('addProductForm').classList.add('hidden');
+            
+            currentPage = 'home';
+        }
+
+        function showCartPage() {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('productDetailPage').classList.add('hidden');
+            document.getElementById('cartPage').classList.remove('hidden');
+            document.getElementById('checkoutPage').classList.add('hidden');
+            document.getElementById('orderConfirmationPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            
+            currentPage = 'cart';
+            
+            // Close side cart if open
+            const sideCart = document.getElementById('sideCart');
+            const overlay = document.getElementById('sideCartOverlay');
+            sideCart.classList.add('translate-x-full');
+            overlay.classList.add('hidden');
+        }
+
+        function checkout() {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('productDetailPage').classList.add('hidden');
+            document.getElementById('cartPage').classList.add('hidden');
+            document.getElementById('checkoutPage').classList.remove('hidden');
+            document.getElementById('orderConfirmationPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            
+            currentPage = 'checkout';
+        }
+
+        function placeOrder() {
+            // In a real app, you would send this data to your backend
+            const orderId = 'ORD-' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+            document.getElementById('orderId').textContent = `#${orderId}`;
+            
+            // Clear the cart
+            cart = [];
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            
+            // Show confirmation page
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('productDetailPage').classList.add('hidden');
+            document.getElementById('cartPage').classList.add('hidden');
+            document.getElementById('checkoutPage').classList.add('hidden');
+            document.getElementById('orderConfirmationPage').classList.remove('hidden');
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            
+            currentPage = 'orderConfirmation';
+        }
+
+        function showLoginPage() {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('productDetailPage').classList.add('hidden');
+            document.getElementById('cartPage').classList.add('hidden');
+            document.getElementById('checkoutPage').classList.add('hidden');
+            document.getElementById('orderConfirmationPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            
+            currentPage = 'login';
+        }
+
+        function login() {
+            // Simple mock login - in a real app, you would validate credentials with your backend
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (email && password) {
+                alert('Login successful!');
+                showHomePage();
+            } else {
+                alert('Please enter both email and password');
+            }
+        }
+
+        function showAdminDashboard() {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('productDetailPage').classList.add('hidden');
+            document.getElementById('cartPage').classList.add('hidden');
+            document.getElementById('checkoutPage').classList.add('hidden');
+            document.getElementById('orderConfirmationPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            
+            currentPage = 'admin';
+        }
+
+        // Admin functions
+        function loadAdminProducts() {
+            const tableBody = document.getElementById('adminProductsTable');
+            tableBody.innerHTML = '';
+            
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="w-10 h-10 overflow-hidden rounded-md">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${product.name}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">$${product.price.toFixed(2)}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="star-rating">
+                                ${renderStars(product.rating)}
+                            </div>
+                            <span class="text-gray-600 text-sm ml-1">${product.rating}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="editProduct(${product.id})" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
+                        <button onclick="deleteProduct(${product.id})" class="text-red-600 hover:text-red-900">Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function showAddProductForm() {
+            document.getElementById('addProductForm').classList.remove('hidden');
+            document.getElementById('productForm').reset();
+            editingProductId = null;
+        }
+
+        function hideAddProductForm() {
+            document.getElementById('addProductForm').classList.add('hidden');
+        }
+
+        function saveProduct() {
+            const name = document.getElementById('productName').value;
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const category = document.getElementById('productCategory').value;
+            const rating = parseInt(document.getElementById('productRating').value);
+            const description = document.getElementById('productDescription').value;
+            const image = document.getElementById('productImage').value;
+            
+            if (editingProductId) {
+                // Update existing product
+                const index = products.findIndex(p => p.id === editingProductId);
+                if (index !== -1) {
+                    products[index] = {
+                        id: editingProductId,
+                        name,
+                        price,
+                        category,
+                        rating,
+                        description,
+                        image
+                    };
+                }
+            } else {
+                // Add new product
+                const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+                products.push({
+                    id: newId,
+                    name,
+                    price,
+                    category,
+                    rating,
+                    description,
+                    image
+                });
+            }
+            
+            // Reload products
+            loadProducts();
+            loadAdminProducts();
+            hideAddProductForm();
+            
+            alert('Product saved successfully!');
+        }
+
+        function editProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productPrice').value = product.price;
+            document.getElementById('productCategory').value = product.category;
+            document.getElementById('productRating').value = product.rating;
+            document.getElementById('productDescription').value = product.description;
+            document.getElementById('productImage').value = product.image;
+            
+            editingProductId = productId;
+            document.getElementById('addProductForm').classList.remove('hidden');
+            
+            // Scroll to form
+            document.getElementById('addProductForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function deleteProduct(productId) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                products = products.filter(p => p.id !== productId);
+                loadProducts();
+                loadAdminProducts();
+                alert('Product deleted successfully!');
+            }
+        }
+    </script>
+</body>
+</html>
